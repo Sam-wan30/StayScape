@@ -9,6 +9,7 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError.js");
+const session = require("express-session");
 const flash = require("connect-flash");
 const helmet = require("helmet");
 const User = require("./models/user.js");
@@ -64,6 +65,19 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 
+// Minimal session configuration for flash messages (not for authentication)
+const sessionOptions = {
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  },
+};
+
+app.use(session(sessionOptions));
 app.use(flash());
 
 // Cookie parser middleware for JWT cookies
