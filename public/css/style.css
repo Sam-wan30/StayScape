@@ -139,17 +139,18 @@ body {
 
 .ss-search-icon {
   position: absolute;
-  left: 1.25rem;
+  left: 1rem;
   color: var(--ss-gray);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   pointer-events: none;
+  z-index: 1;
 }
 
 .search-inp {
   border-radius: var(--ss-radius-pill);
   font-size: 0.925rem;
   width: 18rem;
-  padding: 0.65rem 1.25rem 0.65rem 2.75rem;
+  padding: 0.65rem 1.25rem 0.65rem 2.5rem;
   border: 1px solid var(--ss-gray-light);
   background: var(--ss-white);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -310,12 +311,18 @@ body {
 
 .ss-hero-search .ss-search-wrapper {
   flex: 1;
+  position: relative;
+}
+
+.ss-hero-search .ss-search-icon {
+  left: 1rem;
+  font-size: 0.9rem;
 }
 
 .ss-hero-search .search-inp {
   border: none;
   width: 100%;
-  padding-left: 3rem;
+  padding-left: 2.5rem;
   box-shadow: none;
   background: transparent;
   font-size: 1rem;

@@ -25,6 +25,11 @@ const missingEnv = requiredEnv.filter((key) => !process.env[key]);
 if (missingEnv.length) {
   console.error(`Missing required environment variables: ${missingEnv.join(", ")}`);
   console.error("Copy .env.example to .env and fill in your credentials.");
+  console.error("Current environment:", process.env.NODE_ENV);
+  // In production, still exit but give more detailed error
+  if (process.env.NODE_ENV === "production") {
+    console.error("PRODUCTION ERROR: Application cannot start without environment variables");
+  }
   process.exit(1);
 }
 
@@ -38,12 +43,18 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 
+console.log("Starting StayScape...");
+console.log("Environment:", process.env.NODE_ENV);
+console.log("Port:", port);
+console.log("Attempting to connect to MongoDB...");
+
 main()
   .then(() => {
-    console.log("connected to DB");
+    console.log("Successfully connected to DB");
   })
   .catch((err) => {
     console.error("MongoDB connection error:", err.message);
+    console.error("Full error:", err);
     process.exit(1);
   });
 
@@ -98,6 +109,10 @@ app.get("/", (req, res) => {
   res.redirect("/listings");
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", message: "Service is healthy" });
+});
+
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
@@ -116,5 +131,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, () => {
-  console.log(`StayScape listening on port ${port}`);
+  console.log(`StayScape server listening on port ${port}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
+  console.log("Server is ready to accept requests");
 });
