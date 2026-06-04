@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: stayscape
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ATLASDB_URL
+        sync: false
+      - key: SECRET
+        generateValue: true
+      - key: MAP_TOKEN
+        sync: false
+      - key: CLOUD_NAME
+        sync: false
+      - key: CLOUD_API_KEY
+        sync: false
+      - key: CLOUD_API_SECRET
+        sync: false

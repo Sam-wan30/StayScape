@@ -1,268 +1,265 @@
 <% layout("/layouts/boilerplate") %>
-    <script>
-        const mapToken = "<%= process.env.MAP_TOKEN %>";
-        const listing = <%- JSON.stringify(listing) %>;
-    </script>
+<script>
+    const mapToken = "<%= process.env.MAP_TOKEN %>";
+    const listing = <%- JSON.stringify(listing) %>;
+</script>
 
-    <body>
-        <div class="row">
-            <div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-                <div class="mt-3">
-                    <h3 class="listing-title">
-                        <%=listing.title%>
-                    </h3>
+<div class="container mt-4" data-aos="fade-up">
+    <!-- Header Section -->
+    <div class="listing-title-wrapper mb-3">
+        <h1 class="listing-title"><%= listing.title %></h1>
+        <div class="listing-location-tag">
+            <span class="badge bg-light text-dark border"><i class="fa-solid fa-star text-warning"></i> 4.9</span>
+            <span>&bull;</span>
+            <span><i class="fa-solid fa-location-dot"></i> <%= listing.location %>, <%= listing.country %></span>
+            <span>&bull;</span>
+            <span class="badge bg-light text-secondary border"><%= listing.category %></span>
+        </div>
+    </div>
+
+    <!-- Immersive Main Image -->
+    <div class="show-img-wrapper mb-4">
+        <img src="<%= listing.image.url %>" class="show-img" alt="<%= listing.title %>" loading="lazy">
+    </div>
+
+    <!-- Details and Sidebar Layout -->
+    <div class="ss-show-layout">
+        <!-- Left Side: Main Details -->
+        <div class="details-main-content">
+            <!-- Host Card -->
+            <!-- Host Card -->
+            <% 
+                let hostName = (listing.owner && listing.owner.username) ? listing.owner.username : "StayScape Host";
+                let hostInitial = hostName.charAt(0).toUpperCase();
+            %>
+            <div class="host-profile">
+                <div class="host-avatar">
+                    <%= hostInitial %>
                 </div>
-                <div class="card show-card listing-card">
-                    <img src="<%= listing.image.url %>" class="card-img-top show-img" alt="listing-img">
-                    <div class="listing-card-body mt-3">
-                        <p class="listing-card-text">
-                            <b>Hosted By: </b><i>
-                                <%= listing.owner.username %>
-                            </i>
-                        </p>
-                        <p class="listing-card-text">
-                            <b>Description: </b>
-                            <%=listing.description%>
-                        </p>
-                        <p class="listing-card-text">
-                            <b>Cost: </b>
-                            &#8377;
-                            <%=listing.price.toLocaleString("en-In")%>
-                        </p>
-                        <p class="listing-card-text">
-                            <b>Category:</b>
-                            <%= listing.category %>
-                        </p>
-                        <p class="listing-card-text"><b>Location:&nbsp;&nbsp;</b><i
-                                class="fa-solid fa-location-dot">&nbsp;</i>
-                            <%= listing.location %>
-                        </p>
-                        <p class="listing-card-text"><b>Country:&nbsp;&nbsp;</b><i class="fa-solid fa-globe">&nbsp;</i>
-                            <%= listing.country %>
-                        </p>
-                    </div>
+                <div class="host-info">
+                    <h5>Stay hosted by <%= hostName %></h5>
+                    <p>Superhost &bull; Joined in <%= new Date().getFullYear() - 1 %></p>
                 </div>
-                <div class="show-btns d-flex flex-column flex-md-row justify-content-center gap-2 gap-md-3">
-                    <form action="/listings/<%=listing._id%>/reservelisting" method="GET">
-                        <button class="btn btn-success reserve-btn">Reserve</button>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-4">
+                <h4 class="show-card-title">About this getaway</h4>
+                <p class="listing-description"><%= listing.description %></p>
+            </div>
+
+            <hr class="my-4" style="color: var(--ss-gray-light)">
+
+            <!-- What this place offers -->
+            <div class="mb-4">
+                <h4 class="show-card-title">What this place offers</h4>
+                <div class="offers">
+                    <div><i class="ri-restaurant-line"></i><span> Kitchen</span></div>
+                    <div><i class="ri-car-fill"></i><span> Free parking</span></div>
+                    <div><i class="ri-t-shirt-air-fill"></i><span> Air conditioning</span></div>
+                    <div><i class="ri-tv-2-line"></i><span> Smart TV</span></div>
+                    <div><i class="ri-vidicon-line"></i><span> Security cameras</span></div>
+                    <div><i class="ri-wifi-line"></i><span> High-speed Wifi</span></div>
+                </div>
+                <div class="d-flex mt-3">
+                    <button id="offers" type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        Show all amenities
+                    </button>
+                </div>
+            </div>
+
+            <hr class="my-4" style="color: var(--ss-gray-light)">
+
+            <!-- Add-on services -->
+            <div class="mb-4">
+                <h4 class="show-card-title">Exclusive Add-on Services</h4>
+                <p class="text-muted" style="font-size: 0.95rem;">After booking, a stay designer can arrange these exclusive services for your trip.</p>
+                <div class="offers mt-3">
+                    <div><i class="ri-flight-takeoff-fill"></i><span> Airport Transfer</span></div>
+                    <div><i class="ri-goblet-line"></i><span> Private Butler</span></div>
+                    <div><i class="ri-luggage-cart-fill"></i><span> Pre-stocked Pantry</span></div>
+                    <div><i class="ri-hand-sanitizer-fill"></i><span> Luxury Housekeeping</span></div>
+                </div>
+            </div>
+
+            <hr class="my-4" style="color: var(--ss-gray-light)">
+
+            <!-- Reviews Section -->
+            <div class="mb-4">
+                <% if(currUser) { %>
+                    <h4 class="show-card-title mb-3">Leave a Review</h4>
+                    <form class="needs-validation" novalidate action="/listings/<%= listing._id %>/reviews" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label d-block" for="rating">Your Rating</label>
+                            <fieldset class="starability-slot">
+                                <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" aria-label="No rating." />
+                                <input type="radio" id="first-rate1" name="review[rating]" value="1" checked />
+                                <label for="first-rate1" title="Terrible">1 star</label>
+                                <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                                <label for="first-rate2" title="Not good">2 stars</label>
+                                <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                                <label for="first-rate3" title="Average">3 stars</label>
+                                <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                                <label for="first-rate4" title="Very good">4 stars</label>
+                                <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                                <label for="first-rate5" title="Amazing">5 stars</label>
+                            </fieldset>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="comment">Your Comment</label>
+                            <textarea class="form-control" name="review[comment]" id="comment" cols="30" rows="4" placeholder="Tell us about your experience..." required></textarea>
+                            <div class="invalid-feedback">Please write a comment for your review.</div>
+                        </div>
+                        <button class="btn btn-dark btn-interact">Submit Review</button>
                     </form>
-                </div>
-                <% if(currUser && currUser._id.equals(listing.owner._id)){ %>
-                    <div class="show-btns d-flex flex-column flex-md-row justify-content-center gap-2 gap-md-3 mt-3">
-                        <a href="/listings/<%= listing._id %>/edit" class="btn btn-danger mb-2 mb-md-0">Edit this
-                            Listing</a>
-                        <form action="/listings/<%= listing._id %>?_method=DELETE" method="post">
-                            <button type="submit" class="btn btn-dark">Delete this Listing</button>
-                        </form>
-                    </div>
-                    <%}%>
-                        <% if(currUser){%>
-                            <div class="col-6 offset-3">
-                                <hr>
-                            </div>
+                    <hr class="my-4" style="color: var(--ss-gray-light)">
+                <% } %>
 
-                            <div class="mt-3">
-                                <h4>Leave a Review</h4>
-                                <form class="mt-3 needs-validation" novalidate
-                                    action="/listings/<%= listing._id %>/reviews" method="POST">
-                                    <div class="mt-3">
-                                        <label class="form-label" for="rating">Rating</label>
-                                        <fieldset class="starability-slot">
-                                            <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]"
-                                                value="1" checked aria-label="No rating." />
-                                            <input type="radio" id="first-rate1" name="review[rating]" value="1" />
-                                            <label for="first-rate1" title="Terrible">1 star</label>
-                                            <input type="radio" id="first-rate2" name="review[rating]" value="2" />
-                                            <label for="first-rate2" title="Not good">2 stars</label>
-                                            <input type="radio" id="first-rate3" name="review[rating]" value="3" />
-                                            <label for="first-rate3" title="Average">3 stars</label>
-                                            <input type="radio" id="first-rate4" name="review[rating]" value="4" />
-                                            <label for="first-rate4" title="Very good">4 stars</label>
-                                            <input type="radio" id="first-rate5" name="review[rating]" value="5" />
-                                            <label for="first-rate5" title="Amazing">5 stars</label>
-                                        </fieldset>
+                <% if(listing.reviews.length > 0) { %>
+                    <h4 class="show-card-title mb-3">All Guest Reviews</h4>
+                    <div class="row">
+                        <% for (let review of listing.reviews) { %>
+                            <div class="col-12 col-md-6 mb-3 d-flex">
+                                <div class="card review-card w-100">
+                                    <div class="card-body d-flex flex-column justify-content-between">
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2 mb-2">
+                                                <i class="fa-solid fa-circle-user fa-lg text-secondary"></i>
+                                                <span class="fw-bold"><%= review.author.username %></span>
+                                            </div>
+                                            <p class="starability-result" data-rating="<%= review.rating %>"></p>
+                                            <p class="review-comment"><%= review.comment %></p>
+                                        </div>
+                                        <% if(currUser && currUser._id.equals(review.author._id)) { %>
+                                            <form action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST" class="mt-2">
+                                                <button class="btn btn-sm btn-outline-danger" style="border-radius: var(--ss-radius-sm);">Delete</button>
+                                            </form>
+                                        <% } %>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label" for="comment">Comments</label>
-                                        <textarea class="form-control" name="review[comment]" id="comment" cols="30"
-                                            rows="5" required></textarea>
-                                        <div class="invalid-feedback">Please add some comments for review</div>
-                                    </div>
-                                    <div
-                                        class="show-btns d-flex flex-column flex-md-row justify-content-center gap-2 gap-md-3">
-                                        <button class="btn btn-dark">Submit</button>
-                                    </div>
-                                </form>
-                            </div>
-                            <% } %>
-
-                                <div class="col-6 offset-3">
-                                    <hr>
                                 </div>
-                                <% if(listing.reviews.length> 0){ %>
-                                    <div class="  mt-3">
-                                        <h4>All Reviews</h4>
-                                        <div class="row justify-content-left">
-                                            <% for (let review of listing.reviews) { %>
-                                                <div class="col-12 col-md-6 col-lg-6 d-flex mt-3">
-                                                    <div class="card mb-1 flex-grow-1">
-                                                        <div
-                                                            class="card-body d-flex flex-column justify-content-between">
-                                                            <div>
-                                                                <h5 class="card-title">
-                                                                    <i class="fa-solid fa-circle-user fa-lg"
-                                                                        style="color: #ff0000;">&nbsp;</i>
-                                                                    <i>
-                                                                        <%= review.author.username %>
-                                                                    </i>
-                                                                </h5>
-                                                                <p class="starability-result card-text"
-                                                                    data-rating=<%=review.rating %>></p>
-                                                                <p class="card-text review-comment">
-                                                                    <%= review.comment %>
-                                                                </p>
-                                                            </div>
-                                                            <% if(currUser && currUser._id.equals(review.author._id)){
-                                                                %>
-                                                                <form
-                                                                    action="/listings/<%=listing._id%>/reviews/<%=review._id%>?_method=DELETE"
-                                                                    method="POST">
-                                                                    <button
-                                                                        class="btn btn-sm btn-danger mt-2">Delete</button>
-                                                                </form>
-                                                                <% } %>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <% } %>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 offset-3">
-                                        <hr>
-                                    </div>
+                            </div>
+                        <% } %>
+                    </div>
+                    <hr class="my-4" style="color: var(--ss-gray-light)">
+                <% } %>
+            </div>
 
-                                    <% } %>
-                                        <div class="  mt-3">
-                                            <h4>What this place offers</h4>
-                                            <div class="offers">
-                                                <i class="ri-restaurant-line"><span> Kitchen</span></i>
-                                                <i class="ri-car-fill"><span> Parking</span></i>
-                                                <i class="ri-t-shirt-air-fill"><span> Air conditioning</span></i>
-                                                <i class="ri-tv-2-line"><span> TV</span></i>
-                                                <i class="ri-vidicon-line"><span> Security cameras</span></i>
-                                                <i class="ri-wifi-line"><span> Wifi</span></i>
-                                            </div>
-                                            <div class="d-flex justify-content-center mt-2">
-                                                <button id="offers" type="button" class="btn btn-dark"
-                                                    data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                                    Show all amenities
-                                                </button>
-                                            </div>
-
-                                            <div class="modal fade" id="exampleModal" tabindex="-1"
-                                                aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h1 class="modal-title fs-5" id="exampleModalLabel">What
-                                                                this
-                                                                place offers</h1>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <ul>
-                                                                <h5>Scenic views</h5>
-                                                                <li>Lake view</li>
-                                                                <li>Mountain view</li>
-                                                                <li>Pool view</li>
-                                                                <hr />
-                                                            </ul>
-                                                            <ul>
-                                                                <h5>Bathrooms</h5>
-                                                                <li>Cleaning products</li>
-                                                                <li>Shampoo</li>
-                                                                <li>Hot Water</li>
-                                                                <hr />
-                                                            </ul>
-                                                            <ul>
-                                                                <h5>Bedroom and laundry</h5>
-                                                                <li>Essentials</li>
-                                                                <li>Hangers</li>
-                                                                <li>Bed linen</li>
-                                                                <hr />
-                                                            </ul>
-                                                            <ul>
-                                                                <h5>Entertainment</h5>
-                                                                <li>TV with standard cable/satellite</li>
-                                                                <li>Sound system with Bluetooth and aux</li>
-                                                                <li>Pool table</li>
-                                                                <hr />
-                                                            </ul>
-                                                            <ul>
-                                                                <h5>Outdoor</h5>
-                                                                <li>Patio or balcony</li>
-                                                                <li>Garden</li>
-                                                                <li>Hammock</li>
-                                                                <li>Firepit</li>
-                                                                <li>BBQ grill</li>
-                                                                <hr />
-                                                            </ul>
-                                                            <ul>
-                                                                <h5>Kitchen and dining</h5>
-                                                                <li>Dishes and cutlery</li>
-                                                                <li>Barbecue utensils</li>
-                                                                <li>Dining table</li>
-                                                                <li>Freezer</li>
-                                                                <hr />
-                                                            </ul>
-                                                            <ul>
-                                                                <h5>Locations Features</h5>
-                                                                <li>Waterfront</li>
-                                                                <p>Right next to a body of water</p>
-                                                                <li>Lake access</li>
-                                                                <p>Guests can get to a lake using a path or dock</p>
-                                                                <li>Private entrance</li>
-                                                                <p>Separate street or building entrance</p>
-                                                            </ul>
-                                                            <ul>
-                                                                <h6>and many more...</h6>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="modal-footer d-flex justify-content-center">
-                                                            <button type="button" class="btn btn-danger"
-                                                                data-bs-dismiss="modal">Close</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 offset-3">
-                                            <hr>
-                                        </div>
-
-                                        <div class="  mt-3" id="services">
-                                            <h4>Add-on services</h4>
-                                            <p>
-                                                After booking this home, a trip designer can arrange any of these
-                                                add-on
-                                                services.
-                                            </p>
-                                            <div class="offers">
-                                                <i class="ri-flight-takeoff-fill"><span> Airport Transfer</span></i>
-                                                <i class="ri-goblet-line"><span> Butler</span></i>
-                                                <i class="ri-luggage-cart-fill"><span> Pre-stocking</span></i>
-                                                <i class="ri-hand-sanitizer-fill"><span> Cleaning</span></i>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 offset-3">
-                                            <hr>
-                                        </div>
-
-                                        <div class="  mt-3 mb-3">
-                                            <h4>Where you'll be</h4>
-                                            <div id="map">
-                                            </div>
-                                        </div>
+            <!-- Map Section -->
+            <div class="mb-4">
+                <h4 class="show-card-title">Where you'll be</h4>
+                <div id="map" class="mb-2"></div>
+                <p class="map-click"><i class="fa-solid fa-circle-info"></i> Exact location is provided after reservation approval.</p>
             </div>
         </div>
-        <script src="/js/map.js"></script>
-    </body>
+
+        <!-- Right Side: Booking & Reservation Sidebar -->
+        <div class="booking-sidebar">
+            <div class="booking-card">
+                <div class="booking-price">
+                    &#8377; <%= listing.price.toLocaleString("en-IN") %> <span>/ night</span>
+                </div>
+                
+                <!-- Quick Info Panel -->
+                <div class="card mb-4 bg-light border-0">
+                    <div class="card-body p-3" style="font-size: 0.875rem;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-secondary">Basic Nightly Rate</span>
+                            <span class="fw-bold">&#8377; <%= listing.price.toLocaleString("en-IN") %></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-secondary">Luxury Cleaning Fee</span>
+                            <span class="fw-bold">Free</span>
+                        </div>
+                        <div class="d-flex justify-content-between border-top pt-2">
+                            <span class="fw-bold">Total (Excl. taxes)</span>
+                            <span class="fw-bold">&#8377; <%= listing.price.toLocaleString("en-IN") %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <form action="/listings/<%= listing._id %>/reservelisting" method="GET">
+                    <button class="btn reserve-btn btn-interact">Request to Reserve</button>
+                </form>
+                
+                <p class="booking-notes mt-3"><i class="fa-solid fa-lock text-muted me-1"></i> Secure booking & support included.</p>
+
+                <!-- Admin Action Buttons (Edit/Delete) -->
+                <% if(currUser && listing.owner && currUser._id.equals(listing.owner._id)) { %>
+                    <div class="border-top mt-4 pt-4">
+                        <h6 class="fw-bold text-uppercase text-secondary mb-3" style="font-size: 0.75rem; letter-spacing: 0.05em;">Host Actions</h6>
+                        <div class="d-grid gap-2">
+                            <a href="/listings/<%= listing._id %>/edit" class="btn edit-btn text-center">Edit Listing</a>
+                            <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST" class="d-grid">
+                                <button type="submit" class="btn delete-btn">Delete Listing</button>
+                            </form>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Amenities Modal Box -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: var(--ss-radius-lg); border: none;">
+            <div class="modal-header border-0 pb-0">
+                <h1 class="modal-title fs-4 fw-extrabold" id="exampleModalLabel" style="letter-spacing: -0.02em;">What this place offers</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4">
+                <ul class="list-unstyled">
+                    <h5 class="fw-bold mb-3 mt-2" style="font-size: 1.1rem; color: var(--ss-primary);">Scenic views</h5>
+                    <li class="mb-2"><i class="fa-solid fa-water me-2 text-secondary"></i> Lake view</li>
+                    <li class="mb-2"><i class="fa-solid fa-mountain me-2 text-secondary"></i> Mountain view</li>
+                    <li class="mb-2"><i class="fa-solid fa-water-ladder me-2 text-secondary"></i> Pool view</li>
+                    <hr class="my-3 text-muted">
+                </ul>
+                <ul class="list-unstyled">
+                    <h5 class="fw-bold mb-3" style="font-size: 1.1rem; color: var(--ss-primary);">Bathrooms</h5>
+                    <li class="mb-2"><i class="fa-solid fa-soap me-2 text-secondary"></i> Cleaning products</li>
+                    <li class="mb-2"><i class="fa-solid fa-pump-soap me-2 text-secondary"></i> Premium Shampoo</li>
+                    <li class="mb-2"><i class="fa-solid fa-temperature-high me-2 text-secondary"></i> Hot Water</li>
+                    <hr class="my-3 text-muted">
+                </ul>
+                <ul class="list-unstyled">
+                    <h5 class="fw-bold mb-3" style="font-size: 1.1rem; color: var(--ss-primary);">Bedroom and laundry</h5>
+                    <li class="mb-2"><i class="fa-solid fa-mattress-pillow me-2 text-secondary"></i> Essentials (Towels, bed sheets)</li>
+                    <li class="mb-2"><i class="fa-solid fa-shirt me-2 text-secondary"></i> Hangers</li>
+                    <li class="mb-2"><i class="fa-solid fa-bed me-2 text-secondary"></i> Premium Bed linen</li>
+                    <hr class="my-3 text-muted">
+                </ul>
+                <ul class="list-unstyled">
+                    <h5 class="fw-bold mb-3" style="font-size: 1.1rem; color: var(--ss-primary);">Entertainment</h5>
+                    <li class="mb-2"><i class="fa-solid fa-tv me-2 text-secondary"></i> TV with standard cable/satellite</li>
+                    <li class="mb-2"><i class="fa-solid fa-volume-high me-2 text-secondary"></i> Bluetooth sound system</li>
+                    <li class="mb-2"><i class="fa-solid fa-circle-play me-2 text-secondary"></i> Pool table</li>
+                    <hr class="my-3 text-muted">
+                </ul>
+                <ul class="list-unstyled">
+                    <h5 class="fw-bold mb-3" style="font-size: 1.1rem; color: var(--ss-primary);">Kitchen and dining</h5>
+                    <li class="mb-2"><i class="fa-solid fa-utensils me-2 text-secondary"></i> Dishes and cutlery</li>
+                    <li class="mb-2"><i class="fa-solid fa-fire-burner me-2 text-secondary"></i> Barbecue utensils</li>
+                    <li class="mb-2"><i class="fa-solid fa-couch me-2 text-secondary"></i> Dining table</li>
+                    <li class="mb-2"><i class="fa-solid fa-snowflake me-2 text-secondary"></i> Freezer</li>
+                    <hr class="my-3 text-muted">
+                </ul>
+                <ul class="list-unstyled">
+                    <h5 class="fw-bold mb-3" style="font-size: 1.1rem; color: var(--ss-primary);">Location Features</h5>
+                    <li class="mb-2 fw-bold"><i class="fa-solid fa-bridge me-2 text-secondary"></i> Waterfront</li>
+                    <p class="text-muted ms-4 mb-2" style="font-size: 0.85rem;">Right next to a body of water</p>
+                    <li class="mb-2 fw-bold"><i class="fa-solid fa-ship me-2 text-secondary"></i> Lake access</li>
+                    <p class="text-muted ms-4 mb-2" style="font-size: 0.85rem;">Guests can get to a lake using a path or dock</p>
+                    <li class="mb-2 fw-bold"><i class="fa-solid fa-door-closed me-2 text-secondary"></i> Private entrance</li>
+                    <p class="text-muted ms-4 mb-2" style="font-size: 0.85rem;">Separate street or building entrance</p>
+                </ul>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-center">
+                <button type="button" class="btn btn-dark" data-bs-dismiss="modal" style="border-radius: var(--ss-radius-pill);">Close Amenities</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/map.js"></script>

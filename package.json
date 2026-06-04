@@ -2,14 +2,16 @@
   "engines": {
     "node": "20"
   },
-  "name": "wanderlust",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "stayscape",
+  "version": "2.0.0",
+  "description": "StayScape — A full-stack vacation rental platform built with Node.js, Express, MongoDB, and EJS.",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
+    "seed": "node init/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["vacation-rental", "express", "mongodb", "full-stack"],
   "author": "",
   "license": "ISC",
   "dependencies": {

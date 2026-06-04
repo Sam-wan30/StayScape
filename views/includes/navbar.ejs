@@ -1,66 +1,53 @@
-<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
+<nav class="navbar navbar-expand-md sticky-top ss-navbar">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/listings"><i class="fa-regular fa-compass"></i></a>
-        <div class="navbar-nav web-title">
-            <a class="nav-link" id="web-title" href="/listings"><b>WanderLust</b></a>
-        </div>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
+        <a class="navbar-brand ss-brand" href="/listings" aria-label="StayScape home">
+            <i class="fa-solid fa-compass ss-brand-icon"></i>
+            <span class="ss-brand-text">StayScape</span>
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+            aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="nav-search nav-hovernav-search-search">
-                <form class="d-flex" role="search" action="/listings/search" method="get" id="searchBox">
-                    <input class="form-control me-2 search-inp" type="search"
-                        placeholder="Search Location | Title | Price" aria-label="Search" name="q" id="mySearchInput" required/>
-                    <button class="btn search-btn" type="submit" id="search">
-                        <i class="fa-solid fa-magnifying-glass"></i>Search
-                    </button>
+            <div class="nav-search mx-auto">
+                <form class="d-flex ss-search-form" role="search" action="/listings/search" method="get" id="searchBox">
+                    <div class="ss-search-wrapper">
+                        <i class="fa-solid fa-magnifying-glass ss-search-icon"></i>
+                        <input class="form-control search-inp" type="search"
+                            placeholder="Where to next?" aria-label="Search" name="q"
+                            id="mySearchInput" required />
+                    </div>
+                    <button class="btn search-btn btn-interact" type="submit" id="search">Search</button>
                 </form>
             </div>
-            <div class="navbar-nav">
+            <div class="navbar-nav ss-nav-actions align-items-center">
                 <div class="dropdown">
-                    <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        <i class="fa-solid fa-circle-user"></i>&nbsp;&nbsp;&nbsp;
+                    <button class="btn ss-user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                        aria-expanded="false" aria-label="User menu">
+                        <i class="fa-solid fa-bars"></i>
+                        <i class="fa-solid fa-circle-user"></i>
                     </button>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu dropdown-menu-end ss-dropdown">
                         <% if(!currUser) { %>
-                            <a class="nav-link" href="/signup"><i class="fa-solid fa-user-plus"></i>&nbsp; &nbsp;<b>Sign
-                                    up</b></a>
-                            <a class="nav-link" href="/login"><b><i class="fa-solid fa-user-check"></i>&nbsp; &nbsp;Log
-                                    in</b></a>
-                            <% } %>
-                                <% if(currUser) { %>
-                                    <h6 class="mt-1 nav-link"><b><i class="fa-solid fa-user"></i>
-                                            &nbsp; &nbsp;<%= currUser.username%>
-                                        </b></h6>
-                                    <a class="nav-link" href="/logout"><b><i
-                                                class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp; &nbsp;Log
-                                            out</b></a>
-                                    <% } %>
-                                        <hr />
-                                        <a class="nav-link" href="/listings/new"><strong><i
-                                                    class="fa-solid fa-circle-plus"></i>&nbsp; &nbsp;Airbnb your
-                                                home</strong></a>
+                            <li><a class="dropdown-item" href="/signup"><i class="fa-solid fa-user-plus me-2 text-muted"></i> Sign up</a></li>
+                            <li><a class="dropdown-item" href="/login"><i class="fa-solid fa-right-to-bracket me-2 text-muted"></i> Log in</a></li>
+                        <% } else { %>
+                            <li><h6 class="dropdown-header"><i class="fa-solid fa-user me-2 text-muted"></i> <%= currUser.username %></h6></li>
+                            <li><a class="dropdown-item text-danger" href="/logout"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Log out</a></li>
+                        <% } %>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item ss-list-home" href="/listings/new"><i class="fa-solid fa-circle-plus me-2"></i> Host your home</a></li>
                     </ul>
                 </div>
                 <div id="responsive-registration">
                     <% if(!currUser) { %>
-                        <a class="nav-link" href="/signup"><i class="fa-solid fa-user-plus"></i>&nbsp;&nbsp;<b>Sign
-                                up</b></a>
-                        <a class="nav-link" href="/login"><i class="fa-solid fa-user-check"></i>&nbsp;&nbsp;<b>Log
-                                in</b></a>
-                        <% } %>
-                            <% if(currUser) { %>
-                                <h6 class="mt-1 nav-link"><b><i class="fa-solid fa-user"></i>
-                                        &nbsp; &nbsp;<%= currUser.username%>
-                                    </b></h6>
-                                <a class="nav-link" href="/logout"><i
-                                        class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp;<b>Log out</b></a>
-                                <% } %>
-                                    <a class="nav-link" href="/listings/new"><i
-                                            class="fa-solid fa-circle-plus"></i>&nbsp; &nbsp;<strong>Airbnb your
-                                            home</strong></a>
+                        <a class="nav-link" href="/signup"><i class="fa-solid fa-user-plus me-1"></i> Sign up</a>
+                        <a class="nav-link" href="/login"><i class="fa-solid fa-right-to-bracket me-1"></i> Log in</a>
+                    <% } else { %>
+                        <span class="nav-link ss-username"><i class="fa-solid fa-user me-1"></i> <%= currUser.username %></span>
+                        <a class="nav-link text-danger" href="/logout"><i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Log out</a>
+                    <% } %>
+                    <a class="nav-link ss-list-home" href="/listings/new"><i class="fa-solid fa-circle-plus me-1"></i> Host your home</a>
                 </div>
             </div>
         </div>

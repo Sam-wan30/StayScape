@@ -20,35 +20,43 @@ async function main() {
   await mongoose.connect(mongoUrl);
 }
 
+// Seed data was exported from MongoDB and uses extended JSON ($oid wrappers).
+// Strip those fields so Mongoose can insert fresh documents.
+const normalizeListing = (obj, { geometry }) => ({
+  title: obj.title,
+  description: obj.description,
+  image: obj.image,
+  price: obj.price,
+  location: obj.location,
+  country: obj.country,
+  category: obj.category,
+  owner: "66567b03fda820235197b582",
+  geometry,
+});
+
 const initDB = async () => {
   try {
     await Listing.deleteMany({});
 
     const updatedData = await Promise.all(
       initData.data.map(async (obj) => {
-        let response;
+        let geometry = obj.geometry;
         try {
-          response = await geoCodingClient
+          const response = await geoCodingClient
             .forwardGeocode({
               query: `${obj.location}, ${obj.country}`,
               limit: 1,
             })
             .send();
+          geometry = response.body.features[0]?.geometry || geometry;
         } catch (error) {
           console.error(
             `Geocoding failed for ${obj.location}, ${obj.country}:`,
             error
           );
-          return { ...obj, owner: "66567b03fda820235197b582", geometry: null };
         }
 
-        const geometry = response.body.features[0].geometry || null;
-
-        return {
-          ...obj,
-          owner: "66567b03fda820235197b582",
-          geometry,
-        };
+        return normalizeListing(obj, { geometry });
       })
     );
 

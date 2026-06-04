@@ -20,6 +20,17 @@ const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
+const requiredEnv = ["ATLASDB_URL", "SECRET", "MAP_TOKEN", "CLOUD_NAME", "CLOUD_API_KEY", "CLOUD_API_SECRET"];
+const missingEnv = requiredEnv.filter((key) => !process.env[key]);
+if (missingEnv.length) {
+  console.error(`Missing required environment variables: ${missingEnv.join(", ")}`);
+  console.error("Copy .env.example to .env and fill in your credentials.");
+  process.exit(1);
+}
+
+const dbUrl = process.env.ATLASDB_URL;
+const port = process.env.PORT || 8080;
+
 app.use(express.static(path.join(__dirname, "/public")));
 app.engine("ejs", ejsMate);
 app.use(methodOverride("_method"));
@@ -27,14 +38,13 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 
-const dbUrl = process.env.ATLASDB_URL;
-
 main()
   .then(() => {
     console.log("connected to DB");
   })
   .catch((err) => {
-    console.log(err);
+    console.error("MongoDB connection error:", err.message);
+    process.exit(1);
   });
 
 async function main() {
@@ -46,10 +56,10 @@ const store = MongoStore.create({
   crypto: {
     secret: process.env.SECRET,
   },
-  touchAfter: 24 * 2600,
+  touchAfter: 24 * 3600,
 });
 
-store.on("error", () => {
+store.on("error", (err) => {
   console.log("ERROR in MONGO SESSION STORE", err);
 });
 
@@ -57,11 +67,13 @@ const sessionOptions = {
   store,
   secret: process.env.SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
     expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "lax" : "lax",
   },
 };
 
@@ -96,9 +108,13 @@ app.all("*", (req, res, next) => {
 
 app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Some Error Occured!" } = err;
+  if (err.name === "CastError") {
+    statusCode = 404;
+    message = "Resource not found!";
+  }
   res.status(statusCode).render("./listings/error.ejs", { message });
 });
 
-app.listen(8080, () => {
-  console.log("Listening on port 8080");
+app.listen(port, () => {
+  console.log(`StayScape listening on port ${port}`);
 });

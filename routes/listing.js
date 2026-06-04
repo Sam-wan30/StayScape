@@ -20,7 +20,7 @@ router
 router.get("/new", isLoggedIn, listingController.renderNewForm);
 
 router.get("/filter/:id", wrapAsync(listingController.filter));
-router.get("/search", listingController.search);
+router.get("/search", wrapAsync(listingController.search));
 
 router
   .route("/:id")
