@@ -47,14 +47,12 @@ module.exports.signupSchema = Joi.object({
       'any.required': 'Email is required'
     }),
   password: Joi.string()
-    .min(8)
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+    .min(6)
     .required()
     .messages({
       'string.base': 'Password must be a string',
       'string.empty': 'Password is required',
-      'string.min': 'Password must be at least 8 characters long',
-      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+      'string.min': 'Password must be at least 6 characters long',
       'any.required': 'Password is required'
     })
 }).prefs({ convert: true, stripUnknown: true });

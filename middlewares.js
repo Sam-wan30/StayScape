@@ -2,106 +2,36 @@ const Listing = require("./models/listing");
 const Review = require("./models/review");
 const { listingSchema, reviewSchema, signupSchema, loginSchema } = require("./schemaValidation");
 const ExpressError = require("./utils/ExpressError");
-const { verifyToken } = require("./utils/jwt");
-const User = require("./models/user");
 const rateLimit = require("express-rate-limit");
 
-/**
- * JWT Authentication Middleware
- * Verifies JWT token from Authorization header or cookie
- */
-module.exports.authenticateJWT = async (req, res, next) => {
-  try {
-    // Get token from Authorization header or cookie
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.startsWith('Bearer ') 
-      ? authHeader.substring(7) 
-      : req.cookies?.token;
-
-    if (!token) {
-      return res.status(401).json({ error: "Access denied. No token provided." });
-    }
-
-    // Verify token
-    const decoded = verifyToken(token);
-    
-    // Find user and attach to request
-    const user = await User.findById(decoded.id).select('-password -salt');
-    if (!user) {
-      return res.status(401).json({ error: "User not found." });
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: "Invalid or expired token." });
-  }
-};
-
-/**
- * Check if user is authenticated (for web routes)
- * Similar to isLoggedIn but uses JWT instead of sessions
- */
-module.exports.isLoggedIn = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.startsWith('Bearer ') 
-      ? authHeader.substring(7) 
-      : req.cookies?.token;
-
-    if (!token) {
-      req.flash("error", "You must be logged in!");
-      return res.redirect("/login");
-    }
-
-    const decoded = verifyToken(token);
-    const user = await User.findById(decoded.id).select('-password -salt');
-    
-    if (!user) {
-      req.flash("error", "User not found.");
-      return res.redirect("/login");
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    req.flash("error", "Invalid or expired session. Please log in again.");
+module.exports.isLoggedIn = (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    req.session.redirectUrl = req.originalUrl;
+    req.flash("error", "You must be Logged in!");
     return res.redirect("/login");
   }
+  next();
 };
 
 module.exports.saveRedirectUrl = (req, res, next) => {
-  // For JWT, we can use query params or session storage
-  if (req.query.redirect) {
-    res.locals.redirectUrl = req.query.redirect;
+  if (req.session.redirectUrl) {
+    res.locals.redirectUrl = req.session.redirectUrl;
   }
   next();
 };
 
 module.exports.isOwner = async (req, res, next) => {
-  try {
-    let { id } = req.params;
-    let listing = await Listing.findById(id);
-    
-    if (!listing) {
-      req.flash("error", "Listing you requested for does not exist!");
-      return res.redirect("/listings");
-    }
-    
-    // Check if user is authenticated
-    if (!req.user || !req.user._id) {
-      req.flash("error", "You must be logged in to perform this action!");
-      return res.redirect("/login");
-    }
-    
-    if (!listing.owner.equals(req.user._id)) {
-      req.flash("error", "You are not the owner of this listing!");
-      return res.redirect(`/listings/${id}`);
-    }
-    next();
-  } catch (error) {
-    next(error);
+  let { id } = req.params;
+  let listing = await Listing.findById(id);
+  if (!listing) {
+    req.flash("error", "Listing you requested for does not exist!");
+    return res.redirect("/listings");
   }
+  if (!listing.owner.equals(req.user._id)) {
+    req.flash("error", "You are not the owner of this listing!");
+    return res.redirect(`/listings/${id}`);
+  }
+  next();
 };
 
 module.exports.validateListing = (req, res, next) => {
@@ -172,27 +102,15 @@ module.exports.apiLimiter = rateLimit({
 });
 
 module.exports.isReviewAuthor = async (req, res, next) => {
-  try {
-    let { id, reviewId } = req.params;
-    let review = await Review.findById(reviewId);
-    
-    if (!review) {
-      req.flash("error", "Review not found!");
-      return res.redirect(`/listings/${id}`);
-    }
-    
-    // Check if user is authenticated
-    if (!req.user || !req.user._id) {
-      req.flash("error", "You must be logged in to perform this action!");
-      return res.redirect("/login");
-    }
-    
-    if (!review.author.equals(req.user._id)) {
-      req.flash("error", "You are not the author of this review!");
-      return res.redirect(`/listings/${id}`);
-    }
-    next();
-  } catch (error) {
-    next(error);
+  let { id, reviewId } = req.params;
+  let review = await Review.findById(reviewId);
+  if (!review) {
+    req.flash("error", "Review not found!");
+    return res.redirect(`/listings/${id}`);
   }
+  if (!review.author.equals(req.user._id)) {
+    req.flash("error", "You are not the author of this review!");
+    return res.redirect(`/listings/${id}`);
+  }
+  next();
 };
