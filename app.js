@@ -9,11 +9,8 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError.js");
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
-const passport = require("passport");
-const LocalStrategy = require("passport-local");
+const helmet = require("helmet");
 const User = require("./models/user.js");
 
 const listingRouter = require("./routes/listing.js");
@@ -26,7 +23,6 @@ if (missingEnv.length) {
   console.error(`Missing required environment variables: ${missingEnv.join(", ")}`);
   console.error("Copy .env.example to .env and fill in your credentials.");
   console.error("Current environment:", process.env.NODE_ENV);
-  // In production, still exit but give more detailed error
   if (process.env.NODE_ENV === "production") {
     console.error("PRODUCTION ERROR: Application cannot start without environment variables");
   }
@@ -62,43 +58,35 @@ async function main() {
   await mongoose.connect(dbUrl);
 }
 
-const store = MongoStore.create({
-  mongoUrl: dbUrl,
-  crypto: {
-    secret: process.env.SECRET,
-  },
-  touchAfter: 24 * 3600,
-});
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable CSP for now to avoid breaking existing functionality
+  crossOriginEmbedderPolicy: false
+}));
 
-store.on("error", (err) => {
-  console.log("ERROR in MONGO SESSION STORE", err);
-});
-
-const sessionOptions = {
-  store,
-  secret: process.env.SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "lax" : "lax",
-  },
-};
-
-app.use(session(sessionOptions));
 app.use(flash());
 
-app.use(passport.initialize());
-app.use(passport.session());
-passport.use(new LocalStrategy(User.authenticate()));
+// Cookie parser middleware for JWT cookies
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+// JWT authentication middleware for all routes
+const { verifyToken } = require("./utils/jwt");
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
+  try {
+    const token = req.cookies?.token;
+    if (token) {
+      const decoded = verifyToken(token);
+      const user = await User.findById(decoded.id).select('-password -salt');
+      if (user) {
+        req.user = user;
+      }
+    }
+  } catch (error) {
+    // Token is invalid or expired, just continue without user
+  }
+  
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.currUser = req.user;
