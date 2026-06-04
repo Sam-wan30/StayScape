@@ -128,6 +128,11 @@ app.all("*", (req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
+  // Prevent sending headers multiple times
+  if (res.headersSent) {
+    return next(err);
+  }
+  
   let { statusCode = 500, message = "Some Error Occured!" } = err;
   if (err.name === "CastError") {
     statusCode = 404;

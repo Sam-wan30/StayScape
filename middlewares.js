@@ -39,10 +39,9 @@ module.exports.validateListing = (req, res, next) => {
   if (error) {
     console.log(error);
     let errMsg = error.details.map((el) => el.message).join(",");
-    throw new ExpressError(400, errMsg);
-  } else {
-    next();
+    return next(new ExpressError(400, errMsg));
   }
+  next();
 };
 
 module.exports.validateReview = (req, res, next) => {
@@ -50,10 +49,9 @@ module.exports.validateReview = (req, res, next) => {
   if (error) {
     console.log(error);
     let errMsg = error.details.map((el) => el.message).join(",");
-    throw new ExpressError(400, errMsg);
-  } else {
-    next();
+    return next(new ExpressError(400, errMsg));
   }
+  next();
 };
 
 module.exports.validateSignup = (req, res, next) => {
@@ -61,10 +59,9 @@ module.exports.validateSignup = (req, res, next) => {
   if (error) {
     console.log(error);
     let errMsg = error.details.map((el) => el.message).join(",");
-    throw new ExpressError(400, errMsg);
-  } else {
-    next();
+    return next(new ExpressError(400, errMsg));
   }
+  next();
 };
 
 module.exports.validateLogin = (req, res, next) => {
@@ -72,10 +69,9 @@ module.exports.validateLogin = (req, res, next) => {
   if (error) {
     console.log(error);
     let errMsg = error.details.map((el) => el.message).join(",");
-    throw new ExpressError(400, errMsg);
-  } else {
-    next();
+    return next(new ExpressError(400, errMsg));
   }
+  next();
 };
 
 // Rate limiting middleware for authentication endpoints
