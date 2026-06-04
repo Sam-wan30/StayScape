@@ -90,20 +90,27 @@ const { verifyToken } = require("./utils/jwt");
 app.use(async (req, res, next) => {
   try {
     const token = req.cookies?.token;
+    console.log("Middleware: Token present:", !!token);
     if (token) {
       const decoded = verifyToken(token);
+      console.log("Middleware: Token decoded:", decoded.id);
       const user = await User.findById(decoded.id).select('-password -salt');
       if (user) {
         req.user = user;
+        console.log("Middleware: User found and attached:", user.username);
+      } else {
+        console.log("Middleware: User not found in database");
       }
     }
   } catch (error) {
+    console.log("Middleware: Token verification error:", error.message);
     // Token is invalid or expired, just continue without user
   }
   
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.currUser = req.user;
+  console.log("Middleware: currUser set to:", res.locals.currUser?.username);
   next();
 });
 

@@ -18,9 +18,7 @@ const generateToken = (user) => {
     },
     JWT_SECRET,
     {
-      expiresIn: JWT_EXPIRES_IN,
-      issuer: 'stayscape',
-      audience: 'stayscape-users'
+      expiresIn: JWT_EXPIRES_IN
     }
   );
 };
@@ -38,9 +36,7 @@ const generateRefreshToken = (user) => {
     },
     JWT_SECRET,
     {
-      expiresIn: JWT_REFRESH_EXPIRES_IN,
-      issuer: 'stayscape',
-      audience: 'stayscape-refresh'
+      expiresIn: JWT_REFRESH_EXPIRES_IN
     }
   );
 };
@@ -52,10 +48,7 @@ const generateRefreshToken = (user) => {
  */
 const verifyToken = (token) => {
   try {
-    return jwt.verify(token, JWT_SECRET, {
-      issuer: 'stayscape',
-      audience: 'stayscape-users'
-    });
+    return jwt.verify(token, JWT_SECRET);
   } catch (error) {
     throw new Error('Invalid or expired token');
   }
@@ -68,10 +61,7 @@ const verifyToken = (token) => {
  */
 const verifyRefreshToken = (token) => {
   try {
-    return jwt.verify(token, JWT_SECRET, {
-      issuer: 'stayscape',
-      audience: 'stayscape-refresh'
-    });
+    return jwt.verify(token, JWT_SECRET);
   } catch (error) {
     throw new Error('Invalid or expired refresh token');
   }
