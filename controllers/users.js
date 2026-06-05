@@ -8,6 +8,7 @@ module.exports.renderSignupForm = (req, res) => {
 module.exports.signup = async (req, res, next) => {
   try {
     let { username, email, password } = req.body;
+    console.log("Signup attempt:", { username, email, password: "***" });
     let newUser = new User({ email, username });
     const registeredUser = await User.register(newUser, password);
     req.login(registeredUser, (err) => {
@@ -18,6 +19,7 @@ module.exports.signup = async (req, res, next) => {
       res.redirect("/listings");
     });
   } catch (error) {
+    console.log("Signup error:", error);
     req.flash("error", error.message);
     res.redirect("/signup");
   }

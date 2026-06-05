@@ -38,7 +38,9 @@ module.exports.validateListing = (req, res, next) => {
   let { error } = listingSchema.validate(req.body);
   if (error) {
     console.log(error);
-    let errMsg = error.details.map((el) => el.message).join(",");
+    let errMsg = error.details && error.details.length > 0 
+      ? error.details.map((el) => el.message).join(",")
+      : error.message || "Validation failed";
     return next(new ExpressError(400, errMsg));
   }
   next();
@@ -48,7 +50,9 @@ module.exports.validateReview = (req, res, next) => {
   let { error } = reviewSchema.validate(req.body);
   if (error) {
     console.log(error);
-    let errMsg = error.details.map((el) => el.message).join(",");
+    let errMsg = error.details && error.details.length > 0 
+      ? error.details.map((el) => el.message).join(",")
+      : error.message || "Validation failed";
     return next(new ExpressError(400, errMsg));
   }
   next();
@@ -58,7 +62,9 @@ module.exports.validateSignup = (req, res, next) => {
   let { error } = signupSchema.validate(req.body);
   if (error) {
     console.log(error);
-    let errMsg = error.details.map((el) => el.message).join(",");
+    let errMsg = error.details && error.details.length > 0 
+      ? error.details.map((el) => el.message).join(",")
+      : error.message || "Validation failed";
     return next(new ExpressError(400, errMsg));
   }
   next();
@@ -68,7 +74,9 @@ module.exports.validateLogin = (req, res, next) => {
   let { error } = loginSchema.validate(req.body);
   if (error) {
     console.log(error);
-    let errMsg = error.details.map((el) => el.message).join(",");
+    let errMsg = error.details && error.details.length > 0 
+      ? error.details.map((el) => el.message).join(",")
+      : error.message || "Validation failed";
     return next(new ExpressError(400, errMsg));
   }
   next();
