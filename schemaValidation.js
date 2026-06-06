@@ -25,7 +25,7 @@ module.exports.reviewSchema = Joi.object({
 // User authentication validation schemas
 module.exports.signupSchema = Joi.object({
   username: Joi.string()
-    .alphanum()
+    .pattern(/^[a-zA-Z0-9_]+$/)
     .min(3)
     .max(30)
     .required()
@@ -34,7 +34,7 @@ module.exports.signupSchema = Joi.object({
       'string.empty': 'Username is required',
       'string.min': 'Username must be at least 3 characters long',
       'string.max': 'Username cannot exceed 30 characters',
-      'string.alphanum': 'Username can only contain letters and numbers',
+      'string.pattern.base': 'Username can only contain letters, numbers, and underscores',
       'any.required': 'Username is required'
     }),
   email: Joi.string()

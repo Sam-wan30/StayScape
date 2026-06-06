@@ -36,6 +36,10 @@ if (missingEnv.length) {
 const dbUrl = process.env.ATLASDB_URL;
 const port = process.env.PORT || 8080;
 
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
 app.use(express.static(path.join(__dirname, "/public")));
 app.engine("ejs", ejsMate);
 app.use(methodOverride("_method"));
@@ -70,9 +74,6 @@ app.use(helmet({
 
 const store = MongoStore.create({
   mongoUrl: dbUrl,
-  crypto: {
-    secret: process.env.SECRET,
-  },
   touchAfter: 24 * 3600,
 });
 
@@ -84,13 +85,13 @@ const sessionOptions = {
   store,
   secret: process.env.SECRET,
   resave: false,
-  saveUninitialized: true, // Changed to true to ensure session is always saved
+  saveUninitialized: false,
   cookie: {
     expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax", // Simplified to always use lax
+    sameSite: "lax",
   },
 };
 
@@ -109,9 +110,7 @@ app.use((req, res, next) => {
     res.locals.success = req.flash("success") || "";
     res.locals.error = req.flash("error") || "";
     res.locals.currUser = req.user;
-    console.log("Session check - User:", req.user ? req.user.username : "not authenticated", "Path:", req.path);
   } catch (err) {
-    console.log("Error in flash message middleware:", err);
     res.locals.success = "";
     res.locals.error = "";
     res.locals.currUser = req.user;
