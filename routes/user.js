@@ -8,7 +8,7 @@ const userController = require("../controllers/users.js");
 router
   .route("/signup")
   .get(userController.renderSignupForm)
-  .post(authLimiter, validateSignup, wrapAsync(userController.signup));
+  .post(validateSignup, wrapAsync(userController.signup));
 
 router
   .route("/login")
