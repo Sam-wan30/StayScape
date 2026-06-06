@@ -11,12 +11,31 @@ module.exports.signup = async (req, res, next) => {
     console.log("Signup attempt:", { username, email, password: "***" });
     let newUser = new User({ email, username });
     const registeredUser = await User.register(newUser, password);
-    req.login(registeredUser, (err) => {
+    console.log("User registered successfully:", registeredUser.username);
+    
+    // Log the user in and establish session
+    req.login(registeredUser, async (err) => {
       if (err) {
+        console.log("Login error after registration:", err);
         return next(err);
       }
-      req.flash("success", "Welcome to StayScape!");
-      res.redirect("/listings");
+      
+      // Ensure session is saved before redirecting
+      try {
+        await new Promise((resolve, reject) => {
+          req.session.save((err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+        console.log("Session saved successfully, redirecting to listings");
+        req.flash("success", "Welcome to StayScape!");
+        res.redirect("/listings");
+      } catch (sessionErr) {
+        console.log("Session save error:", sessionErr);
+        req.flash("success", "Welcome to StayScape!"); // Still allow redirect even if session save fails
+        res.redirect("/listings");
+      }
     });
   } catch (error) {
     console.log("Signup error:", error);
@@ -30,16 +49,20 @@ module.exports.renderLoginForm = (req, res) => {
 };
 
 module.exports.login = (req, res) => {
+  console.log("Login successful for user:", req.user ? req.user.username : "unknown");
   req.flash("success", "Welcome back to StayScape!");
   let redirectUrl = res.locals.redirectUrl || "/listings";
   res.redirect(redirectUrl);
 };
 
 module.exports.logout = (req, res, next) => {
+  console.log("Logout attempt for user:", req.user ? req.user.username : "unknown");
   req.logout((err) => {
     if (err) {
+      console.log("Logout error:", err);
       return next(err);
     }
+    console.log("Logout successful");
     req.flash("success", "You are logged out!");
     res.redirect("/listings");
   });
