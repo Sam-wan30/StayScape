@@ -15,7 +15,6 @@ router
   .get(userController.renderLoginForm)
   .post(
     saveRedirectUrl,
-    authLimiter,
     passport.authenticate("local", {
       failureRedirect: "/login",
       failureFlash: true,

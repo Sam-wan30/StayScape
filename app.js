@@ -105,10 +105,17 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
-  res.locals.currUser = req.user;
-  console.log("Session check - User:", req.user ? req.user.username : "not authenticated", "Path:", req.path);
+  try {
+    res.locals.success = req.flash("success") || "";
+    res.locals.error = req.flash("error") || "";
+    res.locals.currUser = req.user;
+    console.log("Session check - User:", req.user ? req.user.username : "not authenticated", "Path:", req.path);
+  } catch (err) {
+    console.log("Error in flash message middleware:", err);
+    res.locals.success = "";
+    res.locals.error = "";
+    res.locals.currUser = req.user;
+  }
   next();
 });
 

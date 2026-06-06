@@ -29,9 +29,14 @@ module.exports.renderLoginForm = (req, res) => {
 
 module.exports.login = (req, res) => {
   console.log("Login successful for user:", req.user ? req.user.username : "unknown");
-  req.flash("success", "Welcome back to StayScape!");
-  let redirectUrl = res.locals.redirectUrl || "/listings";
-  res.redirect(redirectUrl);
+  try {
+    req.flash("success", "Welcome back to StayScape!");
+    let redirectUrl = res.locals.redirectUrl || "/listings";
+    res.redirect(redirectUrl);
+  } catch (err) {
+    console.log("Error in login redirect:", err);
+    res.redirect("/listings");
+  }
 };
 
 module.exports.logout = (req, res, next) => {
