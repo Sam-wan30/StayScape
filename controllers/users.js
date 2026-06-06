@@ -13,30 +13,9 @@ module.exports.signup = async (req, res, next) => {
     const registeredUser = await User.register(newUser, password);
     console.log("User registered successfully:", registeredUser.username);
     
-    // Log the user in and establish session
-    req.login(registeredUser, async (err) => {
-      if (err) {
-        console.log("Login error after registration:", err);
-        return next(err);
-      }
-      
-      // Ensure session is saved before redirecting
-      try {
-        await new Promise((resolve, reject) => {
-          req.session.save((err) => {
-            if (err) reject(err);
-            else resolve();
-          });
-        });
-        console.log("Session saved successfully, redirecting to listings");
-        req.flash("success", "Welcome to StayScape!");
-        res.redirect("/listings");
-      } catch (sessionErr) {
-        console.log("Session save error:", sessionErr);
-        req.flash("success", "Welcome to StayScape!"); // Still allow redirect even if session save fails
-        res.redirect("/listings");
-      }
-    });
+    // Redirect to login with success message
+    req.flash("success", "Account created successfully! Please log in.");
+    res.redirect("/login");
   } catch (error) {
     console.log("Signup error:", error);
     req.flash("error", error.message);
